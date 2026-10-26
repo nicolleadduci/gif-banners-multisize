@@ -17,7 +17,12 @@
 import React from "react";
 import { AbsoluteFill, Composition, Easing, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
 
-/* ------------------------------ brand (from the source, never guessed) ------------------------------ */
+/* ------------------------------ brand: from the user's source ad ------------------------------ *
+ * Fill from brand/brand.json (scripts/extract-brand.mjs on the source ad) and from
+ * settled.png: name each sampled hex's role by looking at the frame. Brand-guide
+ * values the user supplies win over sampled ones. Logo = the vector file; font =
+ * what the source names, or identified by measurement against settled.png.
+ * ------------------------------------------------------------------------------- */
 
 const BRAND = {
   font: "TODO", // load it the way the source project does (@remotion/google-fonts or local @font-face)

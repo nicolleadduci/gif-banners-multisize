@@ -16,8 +16,8 @@ DV360, direct buys, or a custom list.
 
 | Step | What happens |
 |---|---|
-| Intake | Takes the source ad, the sizes, the KB cap, the folder and the naming pattern. Asks once whether revisions overwrite files or save new versions |
-| Copy and brand | Decodes the source frame by frame and pulls every message word for word. Takes colours, fonts and logo from the source files, never from a screenshot |
+| Intake | Takes the source ad (and brand files, if you have them), the sizes, the KB cap, the folder and the naming pattern. Asks once whether revisions overwrite files or save new versions |
+| Brand from the source ad | The ad you send *is* the brand. A script decodes every frame and pulls the ground, CTA and every flat colour as hex values, plus a reference frame. Claude reads the copy word for word from it, identifies the font by measurement, and asks for the vector logo. Brand-guide values you supply override sampled ones |
 | Layout | One system per size. Tall and square sizes get the logo at the top, the CTA at the bottom and equal gaps between. Leaderboards put everything on one centre line. Type is fitted by measurement to be as large as each size allows |
 | Motion | Frame 0 = logo + headline + CTA. Everything else builds in with a short fade and a small rise, on whole pixels. Messages that don't fit together share one slot in sequence, never overlapping |
 | Encode | One global palette per banner, brand colours pinned exactly, no dither, no lossy compression, gifsicle `-O3`. Over the cap? Lower that size's frame rate, never its quality |
@@ -34,6 +34,7 @@ These came out of real art-direction feedback on a production banner set:
 - **Graphic devices** (timelines, dot lines, charts) stay in, scaled to the text they belong to.
 - **Count-ups reserve their final width**, so the copy beside them never jitters.
 - **No cross-fades, masks, overshoot, sub-pixel motion, semi-transparent text or blurred shadows.** Each one makes a GIF look glitchy or soft.
+- **Everything comes from the source ad:** colours, copy, font and logo. Nothing comes from defaults or an earlier job.
 - **Copy word for word from the source**, even when a request paraphrases it.
 
 ## Requirements
@@ -84,6 +85,7 @@ the stat"). Claude changes only that size.
 skills/gif-banners-multisize/
 ├── SKILL.md              the rules and the workflow Claude follows
 ├── scripts/
+│   ├── extract-brand.mjs source ad → brand.json (ground, CTA, flat colours, pin list), settled frame, CTA crop
 │   ├── build-gifs.mjs    render comps → GIF: global sqrt-weighted palette, pinned brand colours, no dither/lossy, gifsicle -O3
 │   └── audit.mjs         whole-loop audit: safe margins, CTA clearance, ink-box measurement for fitting type
 └── references/
@@ -94,8 +96,9 @@ The scripts run from inside your Remotion project:
 
 ```bash
 cp ~/.claude/skills/gif-banners-multisize/scripts/*.mjs _resize/
-PIN="#111111,#ffffff,#ff5a1f" node _resize/build-gifs.mjs out/ spring-
-node _resize/audit.mjs tmp/ spring- --pad 16 --cta "#ff5a1f" --buffer 16
+node _resize/extract-brand.mjs ./ads/spring-offer.gif brand/     # colours, CTA, reference frame
+BRAND=brand/brand.json node _resize/build-gifs.mjs out/ spring-
+node _resize/audit.mjs tmp/ spring- --pad 16 --cta "<CTA hex from brand.json>" --buffer 16
 ```
 
 ## Limits

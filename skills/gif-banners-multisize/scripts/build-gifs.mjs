@@ -1,7 +1,8 @@
 // Encode Remotion banner comps to GIF with one clean global palette.
 //
 //   node _resize/build-gifs.mjs <outDir> [idFilter]
-//   env: PIN="#111111,#ffffff,#ff5a1f"   brand colours kept exact (CTA, ground, type, logo)
+//   env: BRAND=brand/brand.json           pin the colours extract-brand.mjs pulled from the source ad
+//        PIN="#hex,#hex"                 or list them by hand (brand-guide values win over sampled ones)
 //        NTH=2                           every 2nd frame (halves fps) for a size over its KB cap
 //        SCALE=1                         keep 1 for display banners (ad servers need exact pixels)
 //        ENTRY=src/index.ts              Remotion entry point
@@ -35,7 +36,13 @@ const SCALE = Number(process.env.SCALE || 1);
 const ENTRY = process.env.ENTRY || "src/index.ts";
 const IDS = new RegExp(process.env.IDS || ".");
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.trim().slice(i, i + 2), 16));
-const PINNED = (process.env.PIN || "").split(",").filter(Boolean).map(hex);
+const PIN_LIST = process.env.PIN
+  ? process.env.PIN.split(",")
+  : process.env.BRAND
+    ? JSON.parse(fs.readFileSync(process.env.BRAND, "utf8")).pin
+    : [];
+const PINNED = PIN_LIST.filter(Boolean).map(hex);
+if (!PINNED.length) console.warn("no brand colours pinned: run extract-brand.mjs on the source ad and pass BRAND=<outDir>/brand.json");
 fs.mkdirSync(out, { recursive: true });
 
 function buildPalette(hist) {

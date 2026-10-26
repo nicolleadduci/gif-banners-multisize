@@ -13,7 +13,12 @@ The standard is a senior art director's: every size should look designed for tha
 
 1. **Get the source and the spec.** Source ad (GIF/MP4/Remotion comp/Figma), the list of sizes, the platform's KB cap, where to save and how to name files. If a size list arrives as a screenshot of file names, copy the naming pattern exactly (usually `<original name>_<WxH>.gif`).
 2. **Ask about versions once per job.** Banner jobs usually overwrite the same file names when revising (the ad server/trafficker expects stable names), unlike the user's design work, which saves new versions. Ask; don't guess.
-3. **Pull the exact copy and brand from the source.** Decode the source frame by frame and read every message it shows over the whole loop: headline(s), stat, body, payoff line, CTA. Use the copy word for word from the source, even if the user paraphrases it in chat (point out the difference in one line). Get the brand colours, fonts and logo from the source project or brand files. Never estimate them from a screenshot.
+3. **Take the whole brand from the source ad.** The ad the user sends is the brand. Nothing comes from a previous job, a default palette or a guess. Run `scripts/extract-brand.mjs <source> brand/` first. It decodes every frame and writes `brand.json` (ground, CTA and every flat colour, with a `pin` list the encoder reads), `settled.png` (the frame with the most on screen) and `cta.png`. Then:
+   - **Colours:** use the hexes from `brand.json`, and name each one's role (headline, body, accent, logo) by looking at `settled.png`. If the user also gives brand colours or a guide, those win: GIF palettes shift a colour by a few steps, so sampled values are close but may not be exact.
+   - **Text:** read every message across the whole loop, not just one frame: headlines, stat, body, payoff line, CTA label. Use it word for word, even if the user paraphrases it in chat (point out the difference in one line).
+   - **Logo:** use the vector file (SVG/PDF) if the user or the source project has one. Otherwise ask for it. A logo cropped from a GIF is low-res and palette-banded, so use one only as a stopgap and say so.
+   - **Font:** if the source project or brand files name it, use that. Otherwise identify it by measurement: render candidate fonts over a crop of `settled.png` and pick the lowest pixel difference. Fit size and tracking separately, size from cap height first, then tracking from width. Ask if no candidate fits closely.
+   - **CTA:** its size, radius and label style come from `cta.png`, scaled for each banner size.
 4. **If you can't open something** (a link, a locked drive, a font), say so up front instead of working around it silently.
 
 ## Layout rules (apply at every size)
@@ -40,13 +45,13 @@ The standard is a senior art director's: every size should look designed for tha
 
 ## Build pipeline
 
-Build the set in Remotion: one composition per `<ad>-<size>`, all sharing the source's fps and duration. `references/kit.tsx` has the layout and motion primitives that encode the rules above (equal-gap vertical frame, leaderboard frame, CTA, fade-and-rise, count-up with reserved width, two-message slot). Copy it into the project and fill its `TOK` table with this job's sizes. The token values are worked out per job, not copied from an old one.
+Build the set in Remotion: one composition per `<ad>-<size>`, all sharing the source's fps and duration. `references/kit.tsx` has the layout and motion primitives that encode the rules above (equal-gap vertical frame, leaderboard frame, CTA, fade-and-rise, count-up with reserved width, two-message slot). Copy it into the project, fill `BRAND` from `brand.json` and the logo and font you found, and fill the `TOK` table with this job's sizes. Every value is worked out per job; nothing is copied from an old one.
 
 1. **Lay out** each size with the kit. Render stills at the key beats (first frame, mid-build, each message settled, end of the loop) and look at them before encoding.
 2. **Fit type by measurement.** Render, measure the ink box (`scripts/audit.mjs` prints it), adjust, repeat. Never adjust by eye alone.
-3. **Encode** with `scripts/build-gifs.mjs`. It renders the frames and builds one global 256-colour palette over the whole loop, weighted toward rare edge shades, with brand colours pinned exactly. It maps every pixel to its nearest palette colour with no dither and no lossy compression, then runs gifsicle `-O3`. Even gifsicle `--lossy` at low settings leaves specks on type, so don't use it on banners.
+3. **Encode** with `BRAND=brand/brand.json node build-gifs.mjs <out> [filter]`. It renders the frames and builds one global 256-colour palette over the whole loop, weighted toward rare edge shades, with the source ad's colours pinned exactly (or `PIN=` with brand-guide hexes). It maps every pixel to its nearest palette colour with no dither and no lossy compression, then runs gifsicle `-O3`. Even gifsicle `--lossy` at low settings leaves specks on type, so don't use it on banners.
 4. **Hit the KB cap** by lowering that size's frame rate (`NTH=2` renders every 2nd frame). Never use lossy compression, dithering or a smaller palette.
-5. **Audit** every size with `scripts/audit.mjs` before delivering. It checks the whole loop for anything past the safe margins and reports the closest approach to the CTA.
+5. **Audit** every size with `scripts/audit.mjs` before delivering (`--cta` = the CTA hex from `brand.json`). It checks the whole loop for anything past the safe margins and reports the closest approach to the CTA.
 6. **Check the encoded GIFs, not just the stills.** Decode every frame in order (see "Reading GIFs" below) and look at the key beats.
 
 ## Delivering
