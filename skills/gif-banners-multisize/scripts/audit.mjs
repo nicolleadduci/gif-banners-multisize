@@ -1,6 +1,6 @@
 // Audit banner comps over the WHOLE loop, not just the end frame.
 //
-//   node _resize/audit.mjs <tmpDir> [idFilter] [--nth 2] [--pad 16] [--cta #ff542c] [--buffer 16] [--box x0,y0,x1,y1]
+//   node _resize/audit.mjs <tmpDir> [idFilter] [--nth 2] [--pad 16] [--cta #ff5a1f] [--buffer 16] [--box x0,y0,x1,y1]
 //
 // Per comp it reports:
 //   - ink extents across the loop, and anything inside the safe margin (--pad);
