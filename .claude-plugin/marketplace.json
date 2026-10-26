@@ -1,0 +1,16 @@
+{
+  "name": "gif-banners-multisize",
+  "description": "GIF Banners Multisize: a Claude Code skill that resizes one animated ad into a full set of GIF display banners.",
+  "owner": {
+    "name": "nicolleadduci",
+    "url": "https://github.com/nicolleadduci"
+  },
+  "plugins": [
+    {
+      "name": "gif-banners-multisize",
+      "source": "./",
+      "description": "Resize one animated ad into animated GIF banners at any sizes, art-directed per size, under the platform's KB cap.",
+      "version": "1.0.0"
+    }
+  ]
+}

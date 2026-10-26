@@ -1,0 +1,10 @@
+{
+  "name": "gif-banners-multisize",
+  "version": "1.0.0",
+  "description": "Resize one animated ad into a full set of animated GIF display banners at any sizes, with type as large as each size allows, a protected CTA, clean GIF motion and a palette that keeps type sharp under a KB cap.",
+  "author": { "name": "nicolleadduci", "url": "https://github.com/nicolleadduci" },
+  "homepage": "https://github.com/nicolleadduci/gif-banners-multisize",
+  "repository": "https://github.com/nicolleadduci/gif-banners-multisize",
+  "license": "MIT",
+  "keywords": ["gif", "banners", "display-ads", "resize", "remotion", "programmatic", "the-trade-desk", "animation"]
+}
